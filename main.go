@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -10,17 +12,20 @@ import (
 )
 
 func main() {
-	aerospikeHost := os.Getenv("AEROSPIKE_CLOUD_HOST")
+	forever := flag.Bool("forever", false, "loop forever")
+	flag.Parse()
+
+	aerospikeHost := os.Getenv("AEROSPIKE_CLOUD_HOSTNAME")
 	if aerospikeHost == "" {
-		log.Fatal("env var AEROSPIKE_CLOUD_HOST not set.")
+		log.Fatal("required env var AEROSPIKE_CLOUD_HOSTNAME is not set.")
 	}
-	aerospikeKey := os.Getenv("AEROSPIKE_CLOUD_KEY")
+	aerospikeKey := os.Getenv("AEROSPIKE_CLOUD_API_KEY_ID")
 	if aerospikeKey == "" {
-		log.Fatal("env var AEROSPIKE_CLOUD_KEY not set.")
+		log.Fatal("required env var AEROSPIKE_CLOUD_API_KEY_ID is not set.")
 	}
-	aerospikeSecret := os.Getenv("AEROSPIKE_CLOUD_SECRET")
+	aerospikeSecret := os.Getenv("AEROSPIKE_CLOUD_API_KEY_SECRET")
 	if aerospikeSecret == "" {
-		log.Fatal("env var AEROSPIKE_CLOUD_SECRET not set.")
+		log.Fatal("required env var AEROSPIKE_CLOUD_API_KEY_SECRET is not set.")
 	}
 
 	clientPolicy := aerospike.NewClientPolicy()
@@ -37,19 +42,29 @@ func main() {
 	}
 	defer client.Close()
 
-	writePolicy := aerospike.NewWritePolicy(0, 0)
-	writePolicy.TotalTimeout = 5 * time.Second
-
 	key, err := aerospike.NewKey("aerospike_cloud", "foo", "bar")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("0: ", err)
 	}
 
-	bin := aerospike.NewBin("firstbin", "data")
+	if *forever {
+		for {
+			do(client, key)
+			time.Sleep(15 * time.Second)
+		}
+	}
+	do(client, key)
+}
 
-	err = client.PutBins(writePolicy, key, bin)
+func do(client *aerospike.ProxyClient, key *aerospike.Key) {
+	writePolicy := aerospike.NewWritePolicy(0, 0)
+	writePolicy.TotalTimeout = 5 * time.Second
+	bin1 := aerospike.NewBin("firstbin", fmt.Sprintf("data"+time.Now().String()))
+	bin2 := aerospike.NewBin("secondbin", "data2")
+
+	err := client.PutBins(writePolicy, key, bin1, bin2)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("1: ", err)
 	}
 	log.Println("Succesfully wrote record")
 
@@ -57,8 +72,8 @@ func main() {
 	readPolicy.TotalTimeout = 5 * time.Second
 	record, err := client.Get(readPolicy, key)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("2: ", err)
 	}
 
-	log.Printf("Reading record: key: %s, bin map:%v", record.Key, record.Bins)
+	log.Printf("Reading record: key: %s, bin map:%v\n", record.Key, record.Bins)
 }
