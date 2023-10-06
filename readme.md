@@ -1,6 +1,6 @@
 # aerospike app
 
-Test app that writes a single record to an Aerospike db then reads it back.
+Test app that writes data to an Aerospike db.
 
 ### Run app
 Set env vars:
