@@ -5,9 +5,9 @@ Test app that writes data to an Aerospike db.
 ### Run app
 Set env vars:
 ```
-export AEROSPIKE_CLOUD_HOSTNAME=239f1a7c-0183-4de3-8407-172b833cadb9.aerospikedev.com
-export AEROSPIKE_CLOUD_API_KEY_ID=962c9a9589d4455fab8b2c6d42e21f0a
-export AEROSPIKE_CLOUD_API_KEY_SECRET=2f5466ae65c0479aa50cc21622873018
+export AEROSPIKE_CLOUD_HOSTNAME=<db host>
+export AEROSPIKE_CLOUD_API_KEY_ID=<key>
+export AEROSPIKE_CLOUD_API_KEY_SECRET=<secret>
 ```
 
 Build binary
