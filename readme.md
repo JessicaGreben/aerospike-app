@@ -18,6 +18,13 @@ $ go install
 Usage:
 ```
 $ aerospike-app -help
+Usage of aerospike-app:
+  -concurrency int
+    	how many concurrent goroutines to use when writing data. (default 10)
+  -forever
+    	loops forever reading/writing a single record to the database to ensure connectivity. Defaults to false.
+  -seed-data
+    	seed the database with fake data. Defaults to false.
 ```
 
 Run app once which will read/write a single record to the database to check for connectivity:
